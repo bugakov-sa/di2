@@ -1,0 +1,35 @@
+group 'sab.scala'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'scala'
+
+sourceSets {
+    main {
+        scala {
+            srcDirs = ['src/scala']
+        }
+    }
+    test {
+        scala {
+            srcDirs = ['test/scala']
+        }
+    }
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.scala-lang:scala-library:2.12.4'
+
+    compile group: 'com.typesafe.akka', name: 'akka-actor_2.12', version: '2.5.8'
+    compile group: 'com.typesafe.akka', name: 'akka-stream_2.12', version: '2.5.8'
+    compile group: 'com.typesafe.akka', name: 'akka-http_2.12', version: '10.0.11'
+
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    compile group: 'com.typesafe.scala-logging', name: 'scala-logging_2.12', version: '3.7.2'
+}
