@@ -35,4 +35,6 @@ dependencies {
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     compile group: 'com.typesafe.scala-logging', name: 'scala-logging_2.12', version: '3.7.2'
     compile group: 'io.spray', name: 'spray-json_2.12', version: '1.3.4'
+    compile group: 'com.softwaremill.akka-http-session', name: 'core_2.12', version: '0.5.1'
+    compile group: 'com.softwaremill.akka-http-session', name: 'jwt_2.12', version: '0.5.1'
 }
