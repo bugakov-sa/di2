@@ -56,14 +56,6 @@ object Server extends HttpApp {
         }
       }
     } ~ get {
-      path("page") {
-        getFromFile(Paths.get(
-          System.getProperty("user.dir"),
-          "web",
-          "login.html"
-        ).toFile, ContentTypes.`text/html(UTF-8)`)
-      }
-    } ~ get {
       pathPrefix("page") {
         getFromDirectory(Paths.get(
           System.getProperty("user.dir"),
