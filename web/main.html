@@ -64,17 +64,24 @@ $(document).ready(function(){
     {},
     function(data) {
       data.forEach(function(item, i, arr) {
-        var postDiv = document.createElement('div');
+        var postDiv = document.createElement('div')
         postDiv.className = 'blog-post'
         var postDate = document.createElement('p')
         postDate.className = 'blog-post-meta'
         postDate.appendChild(document.createTextNode(new Date(item.time).toLocaleDateString()))
         postDiv.appendChild(postDate)
+        var postReport = document.createElement('p')
+        postReport.appendChild(document.createTextNode('Всего за день ' + item.kcalPerDay + ' ккал'))
+        postDiv.appendChild(postReport)
         var postText = document.createElement('p')
-        postText.appendChild(document.createTextNode(item.text))
+        item.paragraphs.forEach(function(lines) {
+          var paragraph = document.createElement('p')
+          paragraph.innerHTML = lines.join('<br>')
+          postText.appendChild(paragraph)
+        })
         postDiv.appendChild(postText)
         document.getElementById('blogDiv').appendChild(postDiv);
-      });
+      })
     }
   )
   $('#recordHref').click(function(){
@@ -86,6 +93,8 @@ $(document).ready(function(){
     $('#recordDiv').hide()
   })
 });
+
+
 </script>
 </body>
 </html>

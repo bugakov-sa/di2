@@ -1,8 +1,14 @@
+import Settings._
 import org.flywaydb.core.Flyway
 import scalikejdbc._
-import Settings._
 
-case class Record(time:Long, text:String)
+import scala.collection.mutable
+
+final case class RecordDbo(id: Long, time: Long, text: String, code: Int)
+
+final case class MetricDbo(code: Int, time: Long, value: String, recordId: Long)
+
+final case class FullRecordDbo(id: Long, time: Long, text: String, code: Int, metrics: Map[Int, String])
 
 object Repository {
 
@@ -14,15 +20,33 @@ object Repository {
   flyway.setDataSource(dbUrl, dbUser, dbPassword)
   flyway.migrate()
 
-  def recordsCount = sql"select count(*) from records".map(_.int(1)).single.apply.get
+  def listFoodFullRecords = {
 
-  def listRecords = Array(
-    Record(0, "qwert"),
-    Record(1, "äsdfg"),
-    Record(2, "zxcvb")
-  )
+    val records = new mutable.HashMap[Long, RecordDbo]()
+    val metrics = new mutable.HashMap[Long, Map[Int, String]]().withDefaultValue(Map())
 
-  def saveRecord(time:Long, text:String) = {
-    System.out.println("save")
+    sql"""
+      select r.id as id, r.time as time, r.text as text, r.code as code, m.code as m_code, m.value as value
+      from record r left join metric m on r.id = m.record_id
+      where r.code = ${Codes.FOOD_REPORT}
+      order by r.time desc
+    """.foreach(rs => {
+      val recordId = rs.long("id")
+      records(rs.long("id")) = RecordDbo(recordId, rs.long("time"), rs.string("text"), rs.int("code"))
+      Option(rs.int("m_code")) match {
+        case Some(_) => metrics(recordId) = metrics(recordId) + (rs.int("m_code") -> rs.string("value"))
+      }
+    })
+
+    for ((recordId, record) <- records) yield FullRecordDbo(
+      recordId, record.time, record.text, record.code, metrics(recordId))
+  }
+
+  def save(rec: RecordDbo) = {
+    sql"insert into record values(${rec.id}, ${rec.time}, ${rec.text}, ${rec.code})".update().apply()
+  }
+
+  def save(met: MetricDbo) = {
+    sql"insert into metric values(${met.code}, ${met.time}, ${met.value}, ${met.recordId})".update().apply()
   }
 }

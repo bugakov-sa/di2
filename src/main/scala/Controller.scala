@@ -2,17 +2,17 @@ import java.nio.file.Paths
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes._
-import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{HttpApp, Route}
 import com.typesafe.scalalogging.StrictLogging
 import spray.json.DefaultJsonProtocol._
 
-object Server extends HttpApp with StrictLogging {
+object Controller extends HttpApp with StrictLogging {
 
-  final case class SaveRecordRequest(text:String)
+  final case class RequestSaveRecord(text:String)
+  final case class ResponseFoodReport(time: Long, paragraphs: Vector[Vector[String]], kcalPerDay:Int, eatPerDay:Int)
 
-  implicit val saveRecordRequestFormat = jsonFormat1(SaveRecordRequest)
-  implicit val recordFormat = jsonFormat2(Record)
+  implicit val saveRecordRequestFormat = jsonFormat1(RequestSaveRecord)
+  implicit val responseFoodReportFormat = jsonFormat4(ResponseFoodReport)
 
   override def routes: Route =
     get {
@@ -26,18 +26,18 @@ object Server extends HttpApp with StrictLogging {
       }
     } ~ get {
       path("api" / "records") {
-        complete(Repository.listRecords)
+        complete(Service.listFoodReports.map(r => ResponseFoodReport(r.time, r.paragraphs, r.kcalPerDay, r.eatPerDay)))
       }
     } ~ get {
       path("api" / "save") {
         parameters('text.as[String]) { text =>
-          Repository.saveRecord(System.currentTimeMillis, text)
+          Service.saveFoodReport(text)
           redirect("/page/main.html", Found)
         }
       }
     }
 }
 
-object ServerStarter extends App {
-  Server.startServer(Settings.host, Settings.port)
+object Application extends App {
+  Controller.startServer(Settings.host, Settings.port)
 }
