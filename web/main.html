@@ -21,24 +21,27 @@
 <div class="blog-masthead">
     <div class="container">
         <nav class="nav blog-nav">
-            <a class="nav-link active" href="#">История записей</a>
-            <a class="nav-link" href="#">Аналитика</a>
-            <a class="nav-link" href="#">Профиль(<span id="spanUserName"></span>)</a>
-            <a class="nav-link" href="../api/logout">Выход</a>
+            <a id="blogHref" class="nav-link active" href="#">Все записи</a>
+            <a id="recordHref" class="nav-link" href="#">Новая запись</a>
         </nav>
     </div>
 </div>
 
 <div class="container">
     <div class="row">
-        <div class="col-sm-8 blog-main">
-            <div class="blog-post">
-                <p class="blog-post-meta">17.12.2017</p>
-                <p>.................</p>
-            </div>
-        </div><!-- /.blog-main -->
-    </div><!-- /.row -->
-</div><!-- /.container -->
+        <div id="blogDiv" class="col-sm-8 blog-main">
+        </div>
+        <div id="recordDiv" class="col-sm-8 blog-main" hidden>
+            <h4>Текст записи</h4>
+            <form action="../api/save" method="get">
+                <div class="form-group">
+                    <textarea name="text" class="form-control" rows="10"></textarea>
+                </div>
+                <button class="btn btn-primary" type="submit">Сохранить</button>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- Bootstrap core JavaScript
 ================================================== -->
@@ -50,22 +53,38 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"
         integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
         crossorigin="anonymous"></script>
-<script src="../../dist/js/bootstrap.min.js"></script>
-<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
 
+<script src="lib/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
 <script src="lib/jquery-3.2.1.min.js"></script>
+
 <script>
 $(document).ready(function(){
   $.get(
-    "../api/login/current",
+    "../api/records",
     {},
     function(data) {
-      var span = document.getElementById("spanUserName");
-      span.textContent = data;
+      data.forEach(function(item, i, arr) {
+        var postDiv = document.createElement('div');
+        postDiv.className = 'blog-post'
+        var postDate = document.createElement('p')
+        postDate.className = 'blog-post-meta'
+        postDate.appendChild(document.createTextNode(new Date(item.time).toLocaleDateString()))
+        postDiv.appendChild(postDate)
+        var postText = document.createElement('p')
+        postText.appendChild(document.createTextNode(item.text))
+        postDiv.appendChild(postText)
+        document.getElementById('blogDiv').appendChild(postDiv);
+      });
     }
-  );
-
+  )
+  $('#recordHref').click(function(){
+    $('#blogDiv').hide()
+    $('#recordDiv').show()
+  })
+  $('#blogHref').click(function(){
+    $('#blogDiv').show()
+    $('#recordDiv').hide()
+  })
 });
 </script>
 </body>
