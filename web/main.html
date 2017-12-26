@@ -35,7 +35,7 @@
             <h4>Текст записи</h4>
             <form action="../api/save" method="get">
                 <div class="form-group">
-                    <textarea name="text" class="form-control" rows="10"></textarea>
+                    <textarea id="recordTextArea" name="text" class="form-control" rows="10"></textarea>
                 </div>
                 <button class="btn btn-primary" type="submit">Сохранить</button>
             </form>
@@ -87,6 +87,7 @@ $(document).ready(function(){
   $('#recordHref').click(function(){
     $('#blogDiv').hide()
     $('#recordDiv').show()
+    $('#recordTextArea').focus()
   })
   $('#blogHref').click(function(){
     $('#blogDiv').show()

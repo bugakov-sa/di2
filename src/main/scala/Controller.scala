@@ -26,7 +26,7 @@ object Controller extends HttpApp with StrictLogging {
       }
     } ~ get {
       path("api" / "records") {
-        complete(Service.listFoodReports.map(r => ResponseFoodReport(r.time, r.paragraphs, r.kcalPerDay, r.eatPerDay)))
+        complete(Service.listDayFoodReports.map(r => ResponseFoodReport(r.time, r.paragraphs, r.kcalPerDay, r.eatPerDay)))
       }
     } ~ get {
       path("api" / "save") {

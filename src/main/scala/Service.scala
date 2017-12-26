@@ -83,5 +83,5 @@ object Service {
     fullRecord.metrics(Codes.EATING_PER_DAY).toInt
   )
 
-  def listFoodReports = Repository.listFoodFullRecords.map(map _).toVector
+  def listDayFoodReports = Repository.listDayFoodReports.map(map _).toVector.sortBy(-_.time)
 }
