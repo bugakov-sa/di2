@@ -17,7 +17,21 @@ object Codes {
   val FAT_PERCENT = 3
 }
 
+object AnaliticUtil {
+   def kcalCount(text: String) = text
+    .split("\n")
+    .map(_.trim)
+    .filter(!_.isEmpty)
+    .filter(_.split(" ").length > 0)
+    .map(_.split(" ").head)
+    .filter(_.matches("[0-9]{2,4}"))
+    .map(_.toInt)
+    .sum
+}
+
 object Service {
+
+  import AnaliticUtil._
 
   private val datePattern = "([0-9]{1,2})[ ]+([а-я]{3,4})".r
 
@@ -59,16 +73,6 @@ object Service {
     case "нояб" => 10
     case "дек" => 11
   }
-
-  private def kcalCount(text: String) = text
-    .split("\n")
-    .map(_.trim)
-    .filter(!_.isEmpty)
-    .filter(_.split(" ").length > 0)
-    .map(_.split(" ").head)
-    .filter(_.matches("[0-9]{2,4}"))
-    .map(_.toInt)
-    .sum
 
   private def parseParagraphs(text: String) = text.trim
     .replaceAll("[\\w]*\n[\\w]*\n[\\w]*", "\n\n")
