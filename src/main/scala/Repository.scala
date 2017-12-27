@@ -29,7 +29,7 @@ object Repository extends StrictLogging {
     sql"""
       select r.id as id, r.time as time, r.text as text, r.code as code, m.code as m_code, m.value as value
       from record r left join metric m on r.id = m.record_id
-      where r.code = ${Codes.FOOD_REPORT}
+      where r.code = ${RecordCode.FOOD_REPORT.id}
     """.foreach(rs => {
       logger.debug(s"row ${rs.toMap()}")
       val recordId = rs.long("id")
@@ -45,7 +45,7 @@ object Repository extends StrictLogging {
 
   def listKcalTrend = {
     sql"""
-      select time, value from metric where code = ${Codes.KCAL_PER_DAY}
+      select time, value from metric where code = ${MetricCode.KCAL_PER_DAY.id}
       """.map(rs => (rs.long("time"), rs.string("value").toInt)).list().apply()
   }
 

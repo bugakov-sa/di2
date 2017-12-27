@@ -2,7 +2,7 @@ import org.scalatest.FlatSpec
 
 class AnaliticUtilSpec extends FlatSpec {
 
-  "Test kcal sum" should "eating 1 (3 products) + eating 2 (2 products)" in {
+  "Test kcalCount" should "eating 1 (3 products) + eating 2 (2 products)" in {
     val text = "100 картофель\n90 тунец\n40 соус\n\n180 молоко\n190 прот батончик"
     val kcalCount = 100 + 90 + 40 + 180 + 190
     assert(AnaliticUtil.kcalCount(text) == kcalCount)
@@ -22,5 +22,10 @@ class AnaliticUtilSpec extends FlatSpec {
   it should "empty text" in {
     assert(AnaliticUtil.kcalCount("  \n\n \n   \t \n\r  ") == 0)
     assert(AnaliticUtil.kcalCount("") == 0)
+  }
+
+  "Test eatingCount" should "2 eatings" in {
+    val text = "100 картофель\n90 тунец\n40 соус\n\n180 молоко\n190 прот батончик"
+    assert(AnaliticUtil.eatingCount(text) == 2)
   }
 }

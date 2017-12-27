@@ -5,20 +5,21 @@ import Controller.ResponseFoodReport
 
 final case class FoodReport(time: Long, paragraphs: Vector[Vector[String]], kcalPerDay: Int, eatPerDay: Int)
 
-object Codes {
+final object RecordCode extends Enumeration {
+  val FOOD_REPORT = Value(0)
+  val WEIGHTING_REPORT = Value(1)
+  val FREE_RECORD = Value(2)
+}
 
-  val FOOD_REPORT = 0
-  val WEIGHTING_REPORT = 1
-  val FREE_RECORD = 2
-
-  val KCAL_PER_DAY = 0
-  val EATING_PER_DAY = 1
-  val MASS = 2
-  val FAT_PERCENT = 3
+final object MetricCode extends Enumeration {
+  val KCAL_PER_DAY = Value(0)
+  val EATING_PER_DAY = Value(1)
+  val MASS = Value(2)
+  val FAT_PERCENT = Value(3)
 }
 
 object AnaliticUtil {
-   def kcalCount(text: String) = text
+   def kcalCount(foodReportText: String) = foodReportText
     .split("\n")
     .map(_.trim)
     .filter(!_.isEmpty)
@@ -27,6 +28,14 @@ object AnaliticUtil {
     .filter(_.matches("[0-9]{2,4}"))
     .map(_.toInt)
     .sum
+
+  def parseParagraphs(foodReportText: String) = foodReportText.trim
+    .replaceAll("[\\w]*\n[\\w]*\n[\\w]*", "\n\n")
+    .split("\n\n")
+    .map(_.trim.split("\n").toVector)
+    .toVector
+
+  def eatingCount(foodReportText: String) = parseParagraphs(foodReportText).length
 }
 
 object Service {
@@ -54,9 +63,9 @@ object Service {
       }
     }
 
-    Repository.save(RecordDbo(id, time, savingText, Codes.FOOD_REPORT))
-    Repository.save(MetricDbo(Codes.KCAL_PER_DAY, time, kcalCount(savingText).toString, id))
-    Repository.save(MetricDbo(Codes.EATING_PER_DAY, time, parseParagraphs(savingText).length.toString, id))
+    Repository.save(RecordDbo(id, time, savingText, RecordCode.FOOD_REPORT.id))
+    Repository.save(MetricDbo(MetricCode.KCAL_PER_DAY.id, time, kcalCount(savingText).toString, id))
+    Repository.save(MetricDbo(MetricCode.EATING_PER_DAY.id, time, eatingCount(savingText).toString, id))
   }
 
   private def monthIndex(month: String) = month match {
@@ -74,17 +83,11 @@ object Service {
     case "дек" => 11
   }
 
-  private def parseParagraphs(text: String) = text.trim
-    .replaceAll("[\\w]*\n[\\w]*\n[\\w]*", "\n\n")
-    .split("\n\n")
-    .map(_.trim.split("\n").toVector)
-    .toVector
-
   private def map(fullRecord: FullRecordDbo) = ResponseFoodReport(
     fullRecord.time,
-    Service.parseParagraphs(fullRecord.text),
-    fullRecord.metrics(Codes.KCAL_PER_DAY).toInt,
-    fullRecord.metrics(Codes.EATING_PER_DAY).toInt
+    AnaliticUtil.parseParagraphs(fullRecord.text),
+    fullRecord.metrics(MetricCode.KCAL_PER_DAY.id).toInt,
+    fullRecord.metrics(MetricCode.EATING_PER_DAY.id).toInt
   )
 
   def listDayFoodReports = Repository.listDayFoodReports.map(map _).toVector.sortBy(-_.time)
