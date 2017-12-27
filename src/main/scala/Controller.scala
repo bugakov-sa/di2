@@ -35,5 +35,9 @@ object Controller extends HttpApp with StrictLogging {
           redirect("/page/main.html", Found)
         }
       }
+    } ~ get {
+      path("api" / "trends" / "kcal") {
+        complete(Repository.listKcalTrend)
+      }
     }
 }

@@ -21,7 +21,8 @@
 <div class="blog-masthead">
     <div class="container">
         <nav class="nav blog-nav">
-            <a id="blogHref" class="nav-link active" href="#">Все записи</a>
+            <a id="analiticsHref" class="nav-link active" href="#">Аналитика</a>
+            <a id="blogHref" class="nav-link" href="#">Записи</a>
             <a id="recordHref" class="nav-link" href="#">Новая запись</a>
         </nav>
     </div>
@@ -29,7 +30,7 @@
 
 <div class="container">
     <div class="row">
-        <div id="blogDiv" class="col-sm-8 blog-main">
+        <div id="blogDiv" class="col-sm-8 blog-main" hidden>
         </div>
         <div id="recordDiv" class="col-sm-8 blog-main" hidden>
             <h4>Текст записи</h4>
@@ -39,6 +40,9 @@
                 </div>
                 <button class="btn btn-primary" type="submit">Сохранить</button>
             </form>
+        </div>
+        <div id="analiticsDiv">
+            <div id="chartDiv"></div>
         </div>
     </div>
 </div>
@@ -56,9 +60,11 @@
 
 <script src="lib/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
 <script src="lib/jquery-3.2.1.min.js"></script>
+<script src="lib/loader.js"></script>
 
 <script>
 $(document).ready(function(){
+
   $.get(
     "../api/records",
     {},
@@ -84,14 +90,53 @@ $(document).ready(function(){
       })
     }
   )
+
+  $.get(
+    "../api/trends/kcal",
+    {},
+    function(trend) {
+
+      google.charts.load('current', {'packages':['line', 'corechart']})
+      google.charts.setOnLoadCallback(function(){
+
+        var dataTable = new google.visualization.DataTable()
+        dataTable.addColumn('date', 'Дата')
+        dataTable.addColumn('number', "Ккал/день")
+        dataTable.addRows($.map(trend, function(value, i) {
+          return [[new Date(value[0]), value[1]]]
+        }))
+
+        var chartDiv = document.getElementById('chartDiv')
+        var chart = new google.visualization.LineChart(chartDiv)
+        chart.draw(dataTable, {
+          title: 'Дневная сумма килокалорий',
+          height: 200,
+          series: {
+            0: {targetAxisIndex: 0}
+          },
+          vAxes: {
+            0: {title: 'Ккал/день'}
+          }
+        })
+      })
+    }
+  )
+
   $('#recordHref').click(function(){
     $('#blogDiv').hide()
     $('#recordDiv').show()
     $('#recordTextArea').focus()
+    $('#analiticsDiv').hide()
   })
   $('#blogHref').click(function(){
     $('#blogDiv').show()
     $('#recordDiv').hide()
+    $('#analiticsDiv').hide()
+  })
+  $('#analiticsHref').click(function(){
+    $('#blogDiv').hide()
+    $('#recordDiv').hide()
+    $('#analiticsDiv').show()
   })
 });
 

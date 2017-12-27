@@ -43,6 +43,12 @@ object Repository extends StrictLogging {
       recordId, record.time, record.text, record.code, metrics(recordId))
   }
 
+  def listKcalTrend = {
+    sql"""
+      select time, value from metric where code = ${Codes.KCAL_PER_DAY}
+      """.map(rs => (rs.long("time"), rs.string("value").toInt)).list().apply()
+  }
+
   def save(rec: RecordDbo) = {
     sql"insert into record values(${rec.id}, ${rec.time}, ${rec.text}, ${rec.code})".update().apply()
   }
