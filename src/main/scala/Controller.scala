@@ -9,10 +9,10 @@ import spray.json.DefaultJsonProtocol._
 object Controller extends HttpApp with StrictLogging {
 
   final case class RequestSaveRecord(text:String)
-  final case class ResponseFoodReport(time: Long, paragraphs: Vector[Vector[String]], kcalPerDay:Int, eatPerDay:Int)
+  final case class ResponseFoodReport(id:Long, time: Long, paragraphs: Vector[Vector[String]], kcalPerDay:Int, eatPerDay:Int)
 
   implicit val saveRecordRequestFormat = jsonFormat1(RequestSaveRecord)
-  implicit val responseFoodReportFormat = jsonFormat4(ResponseFoodReport)
+  implicit val responseFoodReportFormat = jsonFormat5(ResponseFoodReport)
 
   override def routes: Route =
     get {
@@ -26,12 +26,19 @@ object Controller extends HttpApp with StrictLogging {
       }
     } ~ get {
       path("api" / "records") {
-        complete(Service.listDayFoodReports.map(r => ResponseFoodReport(r.time, r.paragraphs, r.kcalPerDay, r.eatPerDay)))
+        complete(Service.listDayFoodReports)
       }
     } ~ get {
       path("api" / "save") {
         parameters('text.as[String]) { text =>
           Service.saveFoodReport(text)
+          redirect("/page/main.html", Found)
+        }
+      }
+    } ~ get {
+      path("api" / "delete") {
+        parameters('id.as[Long]) { id =>
+          Repository.delete(id)
           redirect("/page/main.html", Found)
         }
       }

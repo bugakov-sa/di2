@@ -56,4 +56,9 @@ object Repository extends StrictLogging {
   def save(met: MetricDbo) = {
     sql"insert into metric values(${met.code}, ${met.time}, ${met.value}, ${met.recordId})".update().apply()
   }
+
+  def delete(id:Long) = {
+    sql"delete from metric where record_id=${id}".update().apply()
+    sql"delete from record where id=${id}".update().apply()
+  }
 }

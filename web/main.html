@@ -76,6 +76,11 @@ $(document).ready(function(){
         postDate.className = 'blog-post-meta'
         postDate.appendChild(document.createTextNode(new Date(item.time).toLocaleDateString()))
         postDiv.appendChild(postDate)
+        var postDelete = document.createElement('a')
+        postDelete.href = "../api/delete?id=" + item.id
+        postDelete.text = "удалить"
+        postDelete.style = "padding-left:20px"
+        postDate.appendChild(postDelete)
         var postReport = document.createElement('p')
         postReport.appendChild(document.createTextNode('Всего за день ' + item.kcalPerDay + ' ккал'))
         postDiv.appendChild(postReport)

@@ -93,6 +93,7 @@ object Service {
 
 
   private def map(fullRecord: FullRecordDbo) = ResponseFoodReport(
+    fullRecord.id,
     fullRecord.time,
     AnaliticUtil.parseParagraphs(fullRecord.text),
     fullRecord.metrics(MetricCode.KCAL_PER_DAY.id).toInt,
