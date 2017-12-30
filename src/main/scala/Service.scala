@@ -19,7 +19,7 @@ final object MetricCode extends Enumeration {
 }
 
 object AnaliticUtil {
-   def kcalCount(foodReportText: String) = foodReportText
+  def kcalCount(foodReportText: String) = foodReportText
     .split("\n")
     .map(_.trim)
     .filter(!_.isEmpty)
@@ -36,37 +36,8 @@ object AnaliticUtil {
     .toVector
 
   def eatingCount(foodReportText: String) = parseParagraphs(foodReportText).length
-}
-
-object Service {
-
-  import AnaliticUtil._
 
   private val datePattern = "([0-9]{1,2})[ ]+([а-я]{3,4})".r
-
-  def saveFoodReport(text: String) = {
-
-    val lines = text.trim.split("\n")
-    val (id, time, savingText) = lines.head.trim match {
-      case datePattern(day, month) => {
-        val calendar = Calendar.getInstance()
-        calendar.set(ZonedDateTime.now.getYear, monthIndex(month), day.toInt)
-        (
-          System.currentTimeMillis,
-          calendar.getTimeInMillis,
-          lines.tail.reduce(_ + "\n" + _)
-        )
-      }
-      case _ => {
-        val currMillis = System.currentTimeMillis
-        (currMillis, currMillis, text)
-      }
-    }
-
-    Repository.save(RecordDbo(id, time, savingText, RecordCode.FOOD_REPORT.id))
-    Repository.save(MetricDbo(MetricCode.KCAL_PER_DAY.id, time, kcalCount(savingText).toString, id))
-    Repository.save(MetricDbo(MetricCode.EATING_PER_DAY.id, time, eatingCount(savingText).toString, id))
-  }
 
   private def monthIndex(month: String) = month match {
     case "янв" => 0
@@ -82,6 +53,44 @@ object Service {
     case "нояб" => 10
     case "дек" => 11
   }
+
+  def parseDate(text: String) = text match {
+    case datePattern(day, month) => {
+      val calendar = Calendar.getInstance()
+      calendar.set(ZonedDateTime.now.getYear, monthIndex(month), day.toInt)
+      Some(calendar.getTimeInMillis)
+    }
+    case _ => None
+  }
+
+}
+
+object Service {
+
+  import AnaliticUtil._
+
+  def saveFoodReport(text: String) = {
+
+    val lines = text.trim.split("\n")
+    val (id, time, savingText) = parseDate(lines.head.trim) match {
+      case Some(millis) => {
+        (
+          System.currentTimeMillis,
+          millis,
+          lines.tail.reduce(_ + "\n" + _)
+        )
+      }
+      case _ => {
+        val currMillis = System.currentTimeMillis
+        (currMillis, currMillis, text)
+      }
+    }
+
+    Repository.save(RecordDbo(id, time, savingText, RecordCode.FOOD_REPORT.id))
+    Repository.save(MetricDbo(MetricCode.KCAL_PER_DAY.id, time, kcalCount(savingText).toString, id))
+    Repository.save(MetricDbo(MetricCode.EATING_PER_DAY.id, time, eatingCount(savingText).toString, id))
+  }
+
 
   private def map(fullRecord: FullRecordDbo) = ResponseFoodReport(
     fullRecord.time,
